@@ -1,0 +1,12 @@
+{
+  "source": "存證信函_郵局格式版_20261028.docx",
+  "gridX": 90.65,
+  "cellWidth": 23.62,
+  "cellHeight": 34,
+  "firstBaseline": 278,
+  "fields": [
+    {"key": "name", "x": 322.55, "baseline": 102, "size": 8, "width": 180, "maxLines": 1},
+    {"key": "address", "x": 270.65, "baseline": 125.5, "size": 8, "width": 285, "maxLines": 2, "lineHeight": 9},
+    {"key": "pages", "x": 130.22, "baseline": 607.5, "size": 9.96, "width": 20, "maxLines": 1}
+  ]
+}

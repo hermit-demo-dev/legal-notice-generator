@@ -1,0 +1,7 @@
+Noto Serif Traditional Chinese
+Source: https://github.com/notofonts/noto-cjk
+Input: Serif/Variable/TTF/Subset/NotoSerifTC-VF.ttf
+License: SIL Open Font License 1.1, included in Noto-LICENSE.txt.
+The source variable font was instantiated at wght=400 using fontTools 4.68.0.
+The resulting TrueType font is supplied locally to support printable Chinese
+PDFs without transferring user data to an external conversion service.
