@@ -37,7 +37,7 @@ function renumber(){[...invoices.children].forEach((row,i)=>{row.querySelector('
 function read(){const d=Object.fromEntries(new FormData(form));d.total=LetterGenerator.wanToYuan(d.total);d.invoices=[...invoices.querySelectorAll('input')].map(i=>LetterGenerator.wanToYuan(i.value));return d;}
 async function loadAssets(){
   const changedAssets=new Set(['assets/postal.docx','assets/content.json','assets/postal-blank.pdf']);
-  const responses=await Promise.all(['assets/original.docx','assets/postal.docx','assets/content.json','assets/postal-blank.pdf','assets/NotoSerifTC-Regular.ttf','assets/pdf-layout.json'].map(p=>fetch(p+(changedAssets.has(p)?'?v=20261105-postal-4':''))));
+  const responses=await Promise.all(['assets/original.docx','assets/postal.docx','assets/content.json','assets/postal-blank.pdf','assets/NotoSerifTC-Regular.ttf','assets/pdf-layout.json'].map(p=>fetch(p+(changedAssets.has(p)?'?v=20261105-postal-5':''))));
   if(responses.some(r=>!r.ok))throw Error('無法讀取範本，請重新整理網頁後再試。');
   return {original:await responses[0].arrayBuffer(),postal:await responses[1].arrayBuffer(),content:await responses[2].json(),blank:await responses[3].arrayBuffer(),font:await responses[4].arrayBuffer(),layout:await responses[5].json()};
 }

@@ -60,7 +60,7 @@
     const data=values(input), paragraphs=assets.content.paragraphs.map(p=>fill(p,data));
     const original=await JSZip.loadAsync(assets.original), postal=await JSZip.loadAsync(assets.postal);
     original.file('word/document.xml',fill(await original.file('word/document.xml').async('string'),data,true));
-    const lines=linesFor(paragraphs.slice(5)),letterPages=Math.ceil(lines.length/10),pages=letterPages+1;
+    const lines=linesFor(paragraphs.slice(5).filter(p=>p!=='寄件人簽章：')),letterPages=Math.ceil(lines.length/10),pages=letterPages+1;
     let body='';
     for(let page=0;page<letterPages;page++) {
       const table=assets.content.postalTable.replace(/\{\{CELL_(\d+)\}\}/g,(_,i)=> {
