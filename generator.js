@@ -60,24 +60,23 @@
     const data=values(input), paragraphs=assets.content.paragraphs.map(p=>fill(p,data));
     const original=await JSZip.loadAsync(assets.original), postal=await JSZip.loadAsync(assets.postal);
     original.file('word/document.xml',fill(await original.file('word/document.xml').async('string'),data,true));
-    const lines=linesFor(paragraphs.slice(5).concat(assets.content.cc)), pages=Math.ceil(lines.length/10);
+    const lines=linesFor(paragraphs.slice(5)),letterPages=Math.ceil(lines.length/10),pages=letterPages+1;
     let body='';
-    for(let page=0;page<pages;page++) {
-      let paragraph=assets.content.postalPage.replace(/\{\{CELL_(\d+)\}\}/g,(_,i)=> {
+    for(let page=0;page<letterPages;page++) {
+      const table=assets.content.postalTable.replace(/\{\{CELL_(\d+)\}\}/g,(_,i)=> {
         const row=Math.floor(Number(i)/20),col=Number(i)%20;
         return escapeXml(Array.from(lines[page*10+row]||'')[col]||'');
       });
-      paragraph=fill(paragraph,{...data,pages},true);
-      // Retain the reference's native drawing groups; give every page unique shape IDs.
-      paragraph=paragraph.replace(/(\s)id="(\d+)"/g,(_,space,id)=>`${space}id="${Number(id)+page*1000}"`)
-        .replace(/_x0000_s(\d+)/g,(_,id)=>'_x0000_s'+(Number(id)+page*1000));
-      if(page)paragraph=paragraph.replace(/<w:pPr([^>]*)>/,'<w:pPr$1><w:pageBreakBefore/>');
-      body+=paragraph;
+      // Normal document-body tables allow clicking, selecting, deleting and typing.
+      const separator=`<w:p><w:pPr>${page?'<w:pageBreakBefore/>':''}<w:keepNext/><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/></w:pPr><w:r><w:rPr><w:sz w:val="2"/></w:rPr></w:r></w:p>`;
+      body+=separator+table;
     }
+    body+=assets.content.ccSlipWord;
     const xml=await postal.file('word/document.xml').async('string');
     postal.file('word/document.xml',xml.replace(/(<w:body[^>]*>)/,match=>match+body));
+    postal.file('word/header1.xml',fill(await postal.file('word/header1.xml').async('string'),{...data,pages:letterPages},true));
     const options={type:'uint8array',compression:'DEFLATE'};
-    return {original:await original.generateAsync(options),postal:await postal.generateAsync(options),paragraphs,pages,lines,data};
+    return {original:await original.generateAsync(options),postal:await postal.generateAsync(options),paragraphs,pages,letterPages,lines,data,cc:assets.content.cc,ccSlip:assets.content.ccSlip};
   }
   const api={filenames,validate,values,fill,linesFor,generate,rocDate,money,wanToYuan};
   if(typeof module!=='undefined' && module.exports) module.exports=api; else root.LetterGenerator=api;

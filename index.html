@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>莘聖沐光居｜存證信函產生器</title><link rel="stylesheet" href="styles.css"><script defer src="vendor/jszip.min.js"></script><script defer src="generator.js"></script><script defer src="vendor/pdf-lib.min.js"></script><script defer src="vendor/fontkit.umd.min.js"></script><script defer src="pdf-generator.js"></script><script defer src="app.js"></script></head>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>莘聖沐光居｜存證信函產生器</title><link rel="stylesheet" href="styles.css"><script defer src="vendor/jszip.min.js"></script><script defer src="generator.js?v=20261105-postal-4"></script><script defer src="vendor/pdf-lib.min.js"></script><script defer src="vendor/fontkit.umd.min.js"></script><script defer src="pdf-generator.js?v=20261105-postal-4"></script><script defer src="app.js?v=20261105-postal-4"></script></head>
 <body><header><a class="brand" href="./">沐光居 <span>已購戶工具</span></a><span class="privacy">● 資料只留在您的瀏覽器</span></header>
-<main><div class="intro"><span class="eyebrow">存證信函 · 2026.10.28 範本</span><h1>填寫一次，<br>準備好兩份信函。</h1><p>依原始草稿的紅字欄位填入您的資料，自動帶入戶別、款項與日期，產生一般信函與郵局格式存證信函，各含 Word 與可列印 PDF。</p></div>
+<main><div class="intro"><span class="eyebrow">存證信函 · 2026.10.28 範本</span><p class="version-note">最後更新：2026-11-05 · 版本：2026.11.05.4</p><h1>填寫一次，<br>準備好兩份信函。</h1><p>依原始草稿的紅字欄位填入您的資料，自動帶入戶別、款項與日期，產生一般信函與郵局格式存證信函，各含 Word 與可列印 PDF。</p></div>
 <div class="workspace"><form id="form"><section class="card"><h2><span>01</span> 寄件與契約資料</h2><div class="fields">
 <label>契約買受人姓名<input name="name" required maxlength="20" autocomplete="off" placeholder="請填寫契約上的姓名"></label>
 <label class="wide">目前可收件地址<input name="address" required maxlength="48" autocomplete="off" placeholder="含郵遞區號、縣市、路段及樓層"></label>
@@ -13,10 +13,13 @@
 </div></section>
 <section class="card"><div class="section-heading"><h2><span>02</span> 已繳款發票</h2><button type="button" id="add" class="text-button">＋ 新增一筆</button></div><p class="help">所有金額均以萬元填寫，可輸入小數，最多4位。逐筆輸入發票金額，已繳款合計與附件張數會自動計算。銀行信託金額沿用此合計，不必重填；請先核對銀行資料一致。</p><div id="invoices"></div><div class="paid-row">已繳款合計<strong id="paid">0 萬元</strong></div></section>
 <section class="card scope"><h2><span>03</span> 確認範本適用情況</h2><p>此工具供莘聖沐光居已購戶使用，沿用原稿的建商、銀行、事故及法律主張。違約金按總價15%計算，以已繳款為上限；未計入利息。</p><label class="check"><input type="checkbox" id="confirm" required><span>我確認尚未簽署解約或免責文件、未收退款，全部已繳款仍在信託，且本戶契約條款及停車空間描述符合範本文字。</span></label><p class="help">附件清單保留四類文件。產生器不會把實際附件併入 Word；請自行備妥，並於寄出前核對全文與收件資料。</p></section>
-<p id="error" role="alert" hidden></p><button id="generate" class="primary" type="submit">產生 Word 與 PDF <span>↗</span></button><button id="sample" type="button" class="sample">填入示例資料</button><p class="local-note">不儲存您填寫的資料；重新整理後會清空。文件最後的簽章處留白，請本人親簽。</p>
+<p id="error" role="alert" hidden></p><button id="generate" class="primary" type="submit">產生 Word 與 PDF <span>↗</span></button><button id="sample" type="button" class="sample">填入示例資料</button><p class="local-note">不儲存您填寫的資料；重新整理後會清空。文件最後的簽章處留白，請本人親簽。存證信函 Word 正文可直接點入字格刪改。</p>
 </form>
 <aside><div class="summary card"><span class="eyebrow">款項試算</span><h2>您的請求金額</h2><div class="claim" id="claim">— 萬元</div><dl><div><dt>返還已繳價款</dt><dd id="sum-paid">—</dd></div><div><dt>契約違約金</dt><dd id="sum-penalty">—</dd></div></dl><p class="help">依範本文字試算，實際認定仍依契約與個案情況。</p><div class="divider"></div><h3>下載內容</h3><div class="file"><b>W</b><div>一般信函<small>Word 可編修，PDF 方便列印</small></div></div><div class="file"><b>W</b><div>存證信函<small>原生清晰框線，每頁20欄 × 10行</small></div></div><div id="results" hidden aria-live="polite"><p id="status"></p><button type="button" id="download-original" class="download">下載一般信函 .docx</button><button type="button" id="download-postal" class="download">下載存證信函 .docx</button><button type="button" id="download-general-pdf" class="download">下載一般信函 .pdf</button><button type="button" id="download-postal-pdf" class="download">下載存證信函 .pdf</button><button type="button" id="download-zip" class="download">一起下載四份檔案 .zip</button><details><summary>檢視產生的信函全文</summary><div id="preview"></div></details></div></div></aside></div>
-</main><footer>莘聖沐光居已購戶參考工具 · 無帳號、無表單傳送、無外部分析追蹤</footer></body></html>
+</main><footer>莘聖沐光居已購戶參考工具 · 無帳號、無表單傳送、無外部分析追蹤 · 最後更新：2026-11-05 · 版本：2026.11.05.4</footer></body></html>
+
+
+
 
 
 

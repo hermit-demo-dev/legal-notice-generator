@@ -36,7 +36,8 @@ function addInvoice(value=''){
 function renumber(){[...invoices.children].forEach((row,i)=>{row.querySelector('span').textContent=`第 ${i+1} 張`;row.querySelector('button').setAttribute('aria-label',`移除第${i+1}張發票`);});document.querySelector('#add').disabled=invoices.children.length>=30;}
 function read(){const d=Object.fromEntries(new FormData(form));d.total=LetterGenerator.wanToYuan(d.total);d.invoices=[...invoices.querySelectorAll('input')].map(i=>LetterGenerator.wanToYuan(i.value));return d;}
 async function loadAssets(){
-  const responses=await Promise.all(['assets/original.docx','assets/postal.docx','assets/content.json','assets/postal-blank.pdf','assets/NotoSerifTC-Regular.ttf','assets/pdf-layout.json'].map(p=>fetch(p)));
+  const changedAssets=new Set(['assets/postal.docx','assets/content.json','assets/postal-blank.pdf']);
+  const responses=await Promise.all(['assets/original.docx','assets/postal.docx','assets/content.json','assets/postal-blank.pdf','assets/NotoSerifTC-Regular.ttf','assets/pdf-layout.json'].map(p=>fetch(p+(changedAssets.has(p)?'?v=20261105-postal-4':''))));
   if(responses.some(r=>!r.ok))throw Error('無法讀取範本，請重新整理網頁後再試。');
   return {original:await responses[0].arrayBuffer(),postal:await responses[1].arrayBuffer(),content:await responses[2].json(),blank:await responses[3].arrayBuffer(),font:await responses[4].arrayBuffer(),layout:await responses[5].json()};
 }
@@ -57,7 +58,7 @@ form.onsubmit=async e=>{
     const result=await LetterGenerator.generate(data,assets,JSZip);
     Object.assign(result,await LetterPdfGenerator.generate(result,assets,PDFLib,fontkit));
     if(started!==revision)throw Error('資料已變更，請重新產生文件。');
-    current=result;document.querySelector('#results').hidden=false;document.querySelector('#status').textContent=`四份檔案已備妥：兩份 Word、兩份 PDF。一般信函 PDF ${result.generalPdfPages} 頁，存證信函 ${result.pages} 頁。`;
+    current=result;document.querySelector('#results').hidden=false;document.querySelector('#status').textContent=`四份檔案已備妥。一般信函 PDF ${result.generalPdfPages} 頁；存證信函正文 ${result.letterPages} 頁＋末頁剪貼聯記表 1 頁，共 ${result.pages} 頁。`;
     const preview=document.querySelector('#preview');preview.replaceChildren();result.paragraphs.forEach(text=>{const p=document.createElement('p');p.textContent=text;preview.append(p);});
     document.querySelector('#results').scrollIntoView({behavior:'smooth',block:'nearest'});
   }catch(ex){error.textContent=ex.message||'產生失敗，請重新整理後再試。';error.hidden=false;error.scrollIntoView({behavior:'smooth',block:'center'});}
@@ -69,5 +70,6 @@ document.querySelector('#download-general-pdf').onclick=()=>{if(current)download
 document.querySelector('#download-postal-pdf').onclick=()=>{if(current)download(current.postalPdf,LetterGenerator.filenames[1].replace(/\.docx$/,'.pdf'),'application/pdf');};
 document.querySelector('#download-zip').onclick=async()=>{if(!current)return;const z=new JSZip();z.file(LetterGenerator.filenames[0],current.original);z.file(LetterGenerator.filenames[1],current.postal);z.file(LetterGenerator.filenames[0].replace(/\.docx$/,'.pdf'),current.generalPdf);z.file(LetterGenerator.filenames[1].replace(/\.docx$/,'.pdf'),current.postalPdf);download(await z.generateAsync({type:'uint8array',compression:'DEFLATE'}),'信函_Word與PDF.zip','application/zip');};
 for(let i=0;i<4;i++)addInvoice();
+
 
 

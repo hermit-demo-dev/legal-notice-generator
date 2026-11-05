@@ -40,7 +40,7 @@
     }
     const postal=await create('存證信函');const background=await postal.doc.embedPdf(assets.blank,[0]);
     const config=assets.layout;
-    for(let p=0;p<result.pages;p++){
+    for(let p=0;p<result.letterPages;p++){
       const sheet=postal.doc.addPage(A4);sheet.drawPage(background[0],{x:0,y:0,width:A4[0],height:A4[1]});
       for(let row=0;row<10;row++){
         const line=Array.from(result.lines[p*10+row]||'');
@@ -50,12 +50,25 @@
         }
       }
       for(const meta of config.fields){
-        const text=String(meta.key==='pages'?result.pages:result.data[meta.key]);
+        const text=String(meta.key==='pages'?result.letterPages:result.data[meta.key]);
         const lines=wrap(text,postal.font,meta.size,meta.width);
         if(lines.length>meta.maxLines)throw Error(`寄件${meta.key==='name'?'姓名':'地址'}超出郵局欄位，請縮短後再產生。`);
         lines.forEach((line,i)=>sheet.drawText(line,{x:meta.x,y:A4[1]-meta.baseline-i*(meta.lineHeight||meta.size+1),size:meta.size,font:postal.font,color:black}));
       }
     }
+    // Detachable recipient list on a plain final page, without postal grid/artwork.
+    const slip=postal.doc.addPage(A4),box=result.ccSlip;
+    slip.drawText(box.note,{x:64,y:A4[1]-66,size:10,font:postal.font,color:black});
+    slip.drawText(box.note2,{x:64,y:A4[1]-86,size:10,font:postal.font,color:black});
+    slip.drawRectangle({x:box.x,y:A4[1]-box.top-box.height,width:box.width,height:box.height,borderColor:black,borderWidth:.75,borderDashArray:[3,2]});
+    let sy=box.top+box.padding;
+    for(let i=0;i<result.cc.length;i++){
+      const size=i===0?11:9,height=i===0?16:12;
+      for(const line of wrap(result.cc[i],postal.font,size,box.width-2*box.padding)){
+        slip.drawText(line,{x:box.x+box.padding,y:A4[1]-sy-size,font:postal.font,size,color:black});sy+=height;
+      }
+    }
+    if(sy>box.top+box.height-box.padding)throw Error('副本聯記表內容超出剪貼框，請調整版型。');
     return {generalPdf:await general.doc.save(),postalPdf:await postal.doc.save(),generalPdfPages:general.doc.getPageCount(),postalPdfPages:postal.doc.getPageCount()};
   }
   const api={generate,wrap};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LetterPdfGenerator=api;
