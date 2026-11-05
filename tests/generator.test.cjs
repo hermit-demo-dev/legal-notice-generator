@@ -34,7 +34,7 @@ test('generate complete packages with every character and variable preserved',as
  const result=await G.generate(sample,assets,Zip), o=await Zip.loadAsync(result.original),p=await Zip.loadAsync(result.postal);
  const ox=await o.file('word/document.xml').async('string'),px=await p.file('word/document.xml').async('string');
  const hx=await p.file('word/header1.xml').async('string');
- assert.equal(result.letterPages,9);assert.equal(result.pages,10);assert(!/\{\{/.test(ox+px+hx));assert.equal((px.match(/<w:tbl[ >]/g)||[]).length,result.letterPages+1);
+ assert.equal(result.letterPages,8);assert.equal(result.pages,9);assert(!/\{\{/.test(ox+px+hx));assert.equal((px.match(/<w:tbl[ >]/g)||[]).length,result.letterPages+1);
  assert(ox.includes('EE0000'));assert(hx.includes('王小明'));assert(hx.includes('220 新北市板橋區示例路1號5樓'));assert(px.includes('w:color="000000"'));
  assert(!px.includes('w:txbxContent')&&!px.includes('w:drawing')&&!px.includes('w:pict')&&!px.includes('mc:AlternateContent'),'all body text must be normal editable Word table content');
  assert(!(await p.file('word/settings.xml').async('string')).includes('w:documentProtection'));
@@ -46,7 +46,7 @@ test('generate complete packages with every character and variable preserved',as
  assert.equal(recovered,result.lines.join(''));
  assert(!result.lines.join('').includes('副本收件人聯記表'));assert(tables.at(-1).includes('副本收件人聯記表'));assert(tables.at(-1).includes('w:val="dashed"'));assert(px.includes('w:sectPr'));assert(px.includes('剪貼用聯記表'));
  const body=result.paragraphs.join('\n');assert.equal(result.data.unit,'第5樓第A戶');assert.equal((body.match(/第5樓第A戶/g)||[]).length,2);assert(!body.includes('棟'));assert(body.includes('4張發票影本'));assert.equal((body.match(/本函送達後14日內/g)||[]).length,2);
- assert.equal(result.paragraphs.at(-1),'寄件人簽章：');assert(!ox.includes('（親簽）'));assert(!px.includes('（親簽）'));
+ assert.equal(result.paragraphs.at(-1),'寄件人簽章：');assert(!result.lines.join('').includes('寄件人簽章'));assert(ox.includes('寄件人簽章'));assert(!recovered.includes('寄件人簽章'));assert(!ox.includes('（親簽）'));assert(!px.includes('（親簽）'));
  const lastParagraph=[...ox.matchAll(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g)].at(-1)[0];
  assert.equal([...lastParagraph.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map(m=>m[1]).join(''),'寄件人簽章：');
  const out=path.resolve(root,'../tmp/web-generator/output');fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,G.filenames[0]),result.original);fs.writeFileSync(path.join(out,G.filenames[1]),result.postal);

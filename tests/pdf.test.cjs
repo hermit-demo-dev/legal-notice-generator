@@ -6,7 +6,7 @@ const sample={name:'王小明',address:'220 新北市板橋區示例路1號5樓'
 test('generate two selectable-text PDFs using retained Word postal form',async()=>{
  const result=await G.generate(sample,assets,Zip);const pdfs=await P.generate(result,assets,PDFLib,fontkit);
  const general=await PDFLib.PDFDocument.load(pdfs.generalPdf),postal=await PDFLib.PDFDocument.load(pdfs.postalPdf);
- assert.equal(general.getPageCount(),2);assert.equal(postal.getPageCount(),result.pages);assert.equal(postal.getPageCount(),result.letterPages+1);assert.equal(result.letterPages,9);assert.equal(postal.getPageCount(),10);
+ assert.equal(general.getPageCount(),2);assert.equal(postal.getPageCount(),result.pages);assert.equal(postal.getPageCount(),result.letterPages+1);assert.equal(result.letterPages,8);assert.equal(postal.getPageCount(),9);
  for(const p of postal.getPages()){assert.equal(p.getWidth(),595.32);assert.equal(p.getHeight(),841.92);}
  const out=path.resolve(root,'../tmp/pdf-upgrade/output');fs.mkdirSync(out,{recursive:true});
  fs.writeFileSync(path.join(out,G.filenames[0]),result.original);fs.writeFileSync(path.join(out,G.filenames[1]),result.postal);
